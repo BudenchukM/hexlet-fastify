@@ -1,0 +1,12 @@
+html
+  body
+    h1 Добавить новый курс
+    form(action='/courses', method='post')
+      div
+        label Название:
+          input(type='text', name='title', required)
+      div
+        label Описание:
+          textarea(name='description', required)
+      div
+        input(type='submit', value='Создать курс')

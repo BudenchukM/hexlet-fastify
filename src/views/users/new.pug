@@ -1,0 +1,20 @@
+html
+  head
+    title Добавить пользователя
+  body
+    h1 Добавление нового пользователя
+    form(action="/users" method="post")
+      div
+        label Имя:
+          input(type="text" name="name" required)
+      div
+        label Email:
+          input(type="email" name="email" required)
+      div
+        label Пароль:
+          input(type="password" name="password" required)
+      div
+        label Подтверждение пароля:
+          input(type="password" name="passwordConfirmation" required)
+      div
+        input(type="submit" value="Зарегистрировать")
