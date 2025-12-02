@@ -54,6 +54,7 @@
     "json-schema-traverse": "^1.0.0",
     "light-my-request": "^6.6.0",
     "locate-path": "^3.0.0",
+    "lodash": "^4.17.21",
     "makeerror": "^1.0.12",
     "minimist": "^1.2.8",
     "on-exit-leak-free": "^2.1.2",
