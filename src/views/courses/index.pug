@@ -1,0 +1,18 @@
+extends ../layouts/page.pug
+
+block content
+  h1 Курсы по программированию
+
+  form(role='form', method='GET', action='/courses')
+    input(type='search', name='term', value=term placeholder='Введите название или описание' required)
+    input(type='submit', value='Искать')
+
+  if courses.length === 0
+    p Пока не найдено ни одного курса
+  else
+    each course in courses
+      div.course
+        h2
+          a(href=`/courses/${course.id}`)= course.title
+        p= course.description
+

@@ -1,8 +1,6 @@
-doctype html
-html
-  head
-    title Unsafe test
-  body
-    h1 Данные пользователя
-    p Значение id:
-    p= id       // Pug ЭКРАНИРУЕТ
+extends layouts/page.pug
+
+block content
+  h1 Пользователь
+  pre= id
+

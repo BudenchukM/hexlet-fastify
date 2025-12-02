@@ -10,7 +10,7 @@ const port = 3000
 // Подключаем Pug
 await app.register(view, {
   engine: { pug },
-  root: './src/views',
+  root: './src/views', // каталог с шаблонами
 })
 
 // ===== Главная =====
@@ -18,7 +18,7 @@ app.get('/', (req, reply) => {
   reply.view('index')
 })
 
-// ===== Список пользователей =====
+// ===== Список пользователей с пейджингом =====
 const users = getUsers()
 
 app.get('/users', (req, reply) => {
@@ -32,10 +32,7 @@ app.get('/users', (req, reply) => {
   reply.send(pageUsers)
 })
 
-
-
-// === 1) Безопасный вывод (sanitize) ===
-// http://localhost:3000/safe-user?id=<script>alert(1)</script>
+// ===== Безопасный вывод (sanitize) =====
 app.get('/safe-user', (req, reply) => {
   const id = req.query.id || ''
   const sanitized = sanitize(id)
@@ -44,19 +41,13 @@ app.get('/safe-user', (req, reply) => {
   reply.send(`<h1>${sanitized}</h1>`)
 })
 
-
-// === 2) Передача НЕ очищенных данных в Pug ===
-// Pug ЭКРАНИРУЕТ сам → XSS НЕ будет
+// ===== Передача НЕ очищенных данных в Pug (Pug сам экранирует) =====
 app.get('/unsafe-user', (req, reply) => {
   const { id } = req.query
-
-  // отправляем В ШАБЛОН без sanitize
   reply.view('unsafeUser', { id })
 })
 
-
-
-// ===== users/:id/post/:postId =====
+// ===== Динамический маршрут users/:id/post/:postId =====
 app.get('/users/:id/post/:postId', (req, reply) => {
   const { id, postId } = req.params
   reply.send(`User ID: ${id}; Post ID: ${postId}`)
@@ -73,21 +64,32 @@ app.get('/hello', (req, reply) => {
   reply.send(`Hello, ${name}!\n`)
 })
 
-// ===== Курсы =====
+// ===== Курсы и поиск =====
 const state = {
   courses: [
     { id: 1, title: 'JS: Массивы', description: 'Курс про массивы' },
     { id: 2, title: 'JS: Функции', description: 'Курс про функции' },
+    { id: 3, title: 'JS: Объекты', description: 'Курс про объекты' },
   ],
 }
 
+// GET /courses с поиском
 app.get('/courses', (req, reply) => {
-  reply.view('courses/index', {
-    courses: state.courses,
-    header: 'Курсы по программированию',
-  })
+  const term = (req.query.term || '').toLowerCase()
+  let filteredCourses = state.courses
+
+  if (term) {
+    filteredCourses = state.courses.filter(
+      course =>
+        course.title.toLowerCase().includes(term) ||
+        course.description.toLowerCase().includes(term)
+    )
+  }
+
+  reply.view('courses/index', { courses: filteredCourses, term })
 })
 
+// GET /courses/:id
 app.get('/courses/:id', (req, reply) => {
   const { id } = req.params
   const course = state.courses.find(c => c.id === parseInt(id, 10))
@@ -100,7 +102,7 @@ app.get('/courses/:id', (req, reply) => {
   reply.view('courses/show', { course })
 })
 
-// ===== Запуск =====
+// ===== Запуск сервера =====
 app.listen({ port }, () => {
   console.log(`Server running at http://localhost:${port}`)
 })
