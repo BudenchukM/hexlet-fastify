@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Test Safe User</title>
+</head>
+<body>
+  <h1>Test /safe-user</h1>
+  <form id="testForm">
+    <label>
+      ID: 
+      <input type="text" id="userId" value="<script>alert('XSS')</script>">
+    </label>
+    <button type="submit">Send</button>
+  </form>
+
+  <h2>Response:</h2>
+  <pre id="response"></pre>
+
+  <script>
+    const form = document.getElementById('testForm');
+    const responseEl = document.getElementById('response');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = encodeURIComponent(document.getElementById('userId').value);
+      const res = await fetch(`http://localhost:3000/safe-user?id=${id}`);
+      const text = await res.text();
+      responseEl.textContent = text;
+    });
+  </script>
+</body>
+</html>

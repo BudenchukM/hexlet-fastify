@@ -1,27 +1,27 @@
 import fastify from 'fastify'
 import view from '@fastify/view'
 import pug from 'pug'
-import _ from 'lodash'
+import sanitize from 'sanitize-html'
 import getUsers from './utils.js'
 
 const app = fastify()
 const port = 3000
 
-// Подключаем Pug с указанием корневого каталога шаблонов
+// Подключаем Pug
 await app.register(view, {
   engine: { pug },
-  root: './src/views', // каталог с шаблонами
+  root: './src/views',
 })
 
-// ===== Главная страница через Pug =====
+// ===== Главная =====
 app.get('/', (req, reply) => {
   reply.view('index')
 })
 
-// ===== Список пользователей с пейджингом =====
-const users = getUsers() // функция из utils.js
+// ===== Список пользователей =====
+const users = getUsers()
 
-app.get('/users', (req, res) => {
+app.get('/users', (req, reply) => {
   const page = parseInt(req.query.page, 10) || 1
   const per = parseInt(req.query.per, 10) || 5
 
@@ -29,27 +29,51 @@ app.get('/users', (req, res) => {
   const end = start + per
   const pageUsers = users.slice(start, end)
 
-  res.send(pageUsers)
+  reply.send(pageUsers)
 })
 
-// ===== Динамический маршрут users/{id}/post/{postId} =====
-app.get('/users/:id/post/:postId', (req, res) => {
+
+
+// === 1) Безопасный вывод (sanitize) ===
+// http://localhost:3000/safe-user?id=<script>alert(1)</script>
+app.get('/safe-user', (req, reply) => {
+  const id = req.query.id || ''
+  const sanitized = sanitize(id)
+
+  reply.type('html')
+  reply.send(`<h1>${sanitized}</h1>`)
+})
+
+
+// === 2) Передача НЕ очищенных данных в Pug ===
+// Pug ЭКРАНИРУЕТ сам → XSS НЕ будет
+app.get('/unsafe-user', (req, reply) => {
+  const { id } = req.query
+
+  // отправляем В ШАБЛОН без sanitize
+  reply.view('unsafeUser', { id })
+})
+
+
+
+// ===== users/:id/post/:postId =====
+app.get('/users/:id/post/:postId', (req, reply) => {
   const { id, postId } = req.params
-  res.send(`User ID: ${id}; Post ID: ${postId}`)
+  reply.send(`User ID: ${id}; Post ID: ${postId}`)
 })
 
 // ===== POST /users =====
-app.post('/users', (req, res) => {
-  res.send('POST /users')
+app.post('/users', (req, reply) => {
+  reply.send('POST /users')
 })
 
-// ===== GET /hello с параметром name =====
-app.get('/hello', (req, res) => {
+// ===== GET /hello =====
+app.get('/hello', (req, reply) => {
   const name = req.query.name || 'World'
-  res.send(`Hello, ${name}!\n`)
+  reply.send(`Hello, ${name}!\n`)
 })
 
-// ===== Пример курсов (для Pug) =====
+// ===== Курсы =====
 const state = {
   courses: [
     { id: 1, title: 'JS: Массивы', description: 'Курс про массивы' },
@@ -57,21 +81,26 @@ const state = {
   ],
 }
 
-app.get('/courses', (req, res) => {
-  res.view('courses/index', { courses: state.courses, header: 'Курсы по программированию' })
+app.get('/courses', (req, reply) => {
+  reply.view('courses/index', {
+    courses: state.courses,
+    header: 'Курсы по программированию',
+  })
 })
 
-app.get('/courses/:id', (req, res) => {
+app.get('/courses/:id', (req, reply) => {
   const { id } = req.params
   const course = state.courses.find(c => c.id === parseInt(id, 10))
+
   if (!course) {
-    res.code(404).send({ message: 'Course not found' })
+    reply.code(404).send({ message: 'Course not found' })
     return
   }
-  res.view('courses/show', { course })
+
+  reply.view('courses/show', { course })
 })
 
-// ===== Запуск сервера =====
+// ===== Запуск =====
 app.listen({ port }, () => {
   console.log(`Server running at http://localhost:${port}`)
 })
