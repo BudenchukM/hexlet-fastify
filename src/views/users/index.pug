@@ -1,19 +1,13 @@
 extends ../layout
 
 block content
-  h1 Пользователи
-  a(href=routes.newUser()) Добавить пользователя
-  br
-  if users.length === 0
-    p Пока нет пользователей
-  else
-    ul
-      each user in users
-        li
-          a(href=routes.user(user.id)) #{user.name} (#{user.email})
-          |  — 
-          a(href=routes.editUser(user.id)) Редактировать
-          form(action=routes.user(user.id), method='POST', style='display:inline')
-            input(type='hidden', name='_method', value='DELETE')
-            button(type='submit') Удалить
+  h1 Список пользователей
+
+  if flash && flash.length
+    each message in flash
+      .alert(class=`alert-${message.type}`) #{message.message}
+
+  ul
+    each user in users
+      li #{user.name} (#{user.email})
 

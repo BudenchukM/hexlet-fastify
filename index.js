@@ -4,6 +4,7 @@ import pug from 'pug'
 import formbody from '@fastify/formbody'
 import fastifyCookie from '@fastify/cookie'
 import session from '@fastify/session'
+import flash from '@fastify/flash'
 
 import registerUserRoutes from './src/routes/users.js'
 import registerCourseRoutes from './src/routes/courses.js'
@@ -19,6 +20,7 @@ await app.register(session, {
   secret: 'a_very_secret_key_of_at_least_32_chars!', // минимум 32 символа
   cookie: { secure: false }, // false для http (не https)
 })
+await app.register(flash) // флеш-сообщения
 
 // Регистрация CRUD маршрутов
 registerUserRoutes(app, state)
@@ -27,7 +29,12 @@ registerCourseRoutes(app, state)
 // ===== Главная =====
 app.get(routes.home(), (req, reply) => {
   const visited = req.cookies.visited === 'true'
-  const templateData = { routes, visited, userId: req.session.userId }
+  const templateData = { 
+    routes, 
+    visited, 
+    userId: req.session.userId,
+    flash: reply.flash()
+  }
   reply.cookie('visited', true, { path: '/', httpOnly: true })
   reply.view('index', templateData)
 })
@@ -36,7 +43,7 @@ app.get(routes.home(), (req, reply) => {
 
 // Форма логина
 app.get('/login', (req, reply) => {
-  reply.view('login', { routes, error: null })
+  reply.view('login', { routes, error: null, flash: reply.flash() })
 })
 
 // Процесс логина
@@ -45,19 +52,20 @@ app.post('/login', (req, reply) => {
   const user = state.users.find(u => u.email === email)
   
   if (user) {
-    // В реальном проекте проверяем hash пароля
     req.session.userId = user.id
+    req.flash('success', 'Вы успешно вошли!')
     reply.redirect(routes.home())
   } else {
-    reply.view('login', { routes, error: 'Пользователь не найден' })
+    req.flash('error', 'Пользователь не найден')
+    reply.redirect('/login')
   }
 })
 
 // Процесс выхода
 app.post('/logout', (req, reply) => {
-  req.destroySession(err => {
-    reply.redirect(routes.home())
-  })
+  req.session.delete() // удаляем сессию
+  req.flash('success', 'Вы вышли из системы')
+  reply.redirect(routes.home())
 })
 
 app.listen({ port: 3000 }, () => console.log('Server running on http://localhost:3000'))

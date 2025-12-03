@@ -1,21 +1,40 @@
 doctype html
 html(lang="ru")
   head
-    meta(charset="UTF-8")
-    title Мое приложение
-    style.
-      body { font-family: Arial; margin: 20px }
-      nav a { margin-right: 15px; text-decoration: none; color: #333 }
-      nav a:hover { text-decoration: underline }
+    meta(charset="utf-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1, shrink-to-fit=no")
+    title My App
+    // Подключение Bootstrap CSS из CDN
+    link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css")
   body
-    header
-      nav
-        a(href=routes.home()) Главная
-        a(href=routes.users()) Пользователи
-        a(href=routes.courses()) Курсы
-    main
+    nav.navbar.navbar-expand-lg.navbar-light.bg-light.mb-4
+      .container
+        a.navbar-brand(href=routes.home()) Мой CRUD
+        ul.navbar-nav
+          li.nav-item
+            a.nav-link(href=routes.users()) Пользователи
+          li.nav-item
+            a.nav-link(href=routes.courses()) Курсы
+          if userId
+            li.nav-item
+              form(action="/logout" method="POST")
+                button.btn.btn-link.nav-link(type="submit") Выйти
+          else
+            li.nav-item
+              a.nav-link(href="/login") Вход
+
+    .container
+      // Блок для флеш-сообщений
+      if flash && flash.length
+        each message in flash
+          .alert(class=`alert-${message.type} alert-dismissible fade show`, role="alert")
+            = message.message
+            button.btn-close(type="button", data-bs-dismiss="alert", aria-label="Close")
+
       block content
-    footer
-      hr
-      p &copy; 2025
+
+    // Подключение Bootstrap JS и Popper.js для работы alert dismiss
+    script(src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js")
+    script(src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.min.js")
+
 
