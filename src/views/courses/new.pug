@@ -1,12 +1,19 @@
 html
+  head
+    title Добавить курс
   body
     h1 Добавить новый курс
-    form(action='/courses', method='post')
+
+    if error
+      p(style="color:red")= error.message
+
+    form(action='/courses' method='post')
       div
         label Название:
-          input(type='text', name='title', required)
+          input(type='text' name='title' value=title)
       div
         label Описание:
-          textarea(name='description', required)
+          textarea(name='description')= description
       div
-        input(type='submit', value='Создать курс')
+        input(type='submit' value='Создать курс')
+

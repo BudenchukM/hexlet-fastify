@@ -4,17 +4,15 @@ import pug from 'pug'
 import sanitize from 'sanitize-html'
 import formbody from '@fastify/formbody'
 import _ from 'lodash'
+import * as yup from 'yup'
 
-// Вспомогательная функция для получения пользователей
 import getUsers from './utils.js'
 
 const app = fastify()
 const port = 3000
 
-// ===== Плагин для парсинга форм =====
+// ===== Плагины =====
 await app.register(formbody)
-
-// ===== Подключаем Pug =====
 await app.register(view, {
   engine: { pug },
   root: './src/views',
@@ -30,7 +28,7 @@ const state = {
   ],
 }
 
-// ===== Главная страница =====
+// ===== Главная =====
 app.get('/', (req, reply) => {
   reply.view('index')
 })
@@ -39,7 +37,7 @@ app.get('/', (req, reply) => {
    Пользователи
 ==========================*/
 
-// GET /users — список пользователей с пейджингом
+// GET /users — список
 app.get('/users', (req, reply) => {
   const page = parseInt(req.query.page, 10) || 1
   const per = parseInt(req.query.per, 10) || 5
@@ -50,89 +48,107 @@ app.get('/users', (req, reply) => {
   reply.view('users/index', { users: pageUsers, page, per })
 })
 
-// GET /users/new — форма создания нового пользователя
+// GET /users/new — форма
 app.get('/users/new', (req, reply) => {
-  reply.view('users/new')
+  reply.view('users/new', { name: '', email: '', password: '', passwordConfirmation: '' })
 })
 
-// POST /users — обработка формы добавления пользователя
-app.post('/users', (req, reply) => {
+// POST /users — yup валидация
+app.post('/users', {
+  attachValidation: true,
+  schema: {
+    body: yup.object({
+      name: yup.string().min(2, 'Имя должно быть не меньше 2 символов').required('Имя обязательно'),
+      email: yup.string().email('Некорректный email').required('Email обязателен'),
+      password: yup.string().min(5, 'Пароль должен быть не короче 5 символов').required('Пароль обязателен'),
+      passwordConfirmation: yup.string().required('Подтверждение пароля обязательно'),
+    })
+  },
+  validatorCompiler: ({ schema }) => (data) => {
+    if (data.password !== data.passwordConfirmation) {
+      return { error: new Error('Пароли не совпадают') }
+    }
+
+    try {
+      const result = schema.validateSync(data)
+      return { value: result }
+    } catch (e) {
+      return { error: e }
+    }
+  }
+}, (req, reply) => {
   const { name, email, password, passwordConfirmation } = req.body
 
-  // Валидация
-  if (!name || !email || !password || !passwordConfirmation) {
-    reply.code(400).send({ message: 'Все поля обязательны' })
-    return
-  }
-
-  if (password !== passwordConfirmation) {
-    reply.code(400).send({ message: 'Пароли не совпадают' })
-    return
+  if (req.validationError) {
+    return reply.view('users/new', {
+      name,
+      email,
+      password,
+      passwordConfirmation,
+      error: req.validationError,
+    })
   }
 
   const user = {
     id: _.uniqueId(),
     name: name.trim(),
     email: email.trim().toLowerCase(),
-    password, // на практике пароли нужно хэшировать!
+    password,
   }
 
   state.users.push(user)
-
   reply.redirect('/users')
-})
-
-// GET /safe-user — безопасный вывод данных через sanitize
-app.get('/safe-user', (req, reply) => {
-  const id = req.query.id || ''
-  const sanitized = sanitize(id)
-  reply.type('html').send(`<h1>${sanitized}</h1>`)
-})
-
-// GET /unsafe-user — передача в Pug (авто-экранирование)
-app.get('/unsafe-user', (req, reply) => {
-  const { id } = req.query
-  reply.view('unsafeUser', { id })
-})
-
-// GET /users/:id/post/:postId — динамический маршрут
-app.get('/users/:id/post/:postId', (req, reply) => {
-  const { id, postId } = req.params
-  reply.send(`User ID: ${id}; Post ID: ${postId}`)
 })
 
 /* =======================
    Курсы
 ==========================*/
 
-// GET /courses — список курсов с поиском
+// GET /courses — список + поиск
 app.get('/courses', (req, reply) => {
   const term = (req.query.term || '').toLowerCase()
-  let filteredCourses = state.courses
+  let filtered = state.courses
 
   if (term) {
-    filteredCourses = state.courses.filter(
-      course =>
-        course.title.toLowerCase().includes(term) ||
-        course.description.toLowerCase().includes(term)
+    filtered = filtered.filter(
+      c => c.title.toLowerCase().includes(term) || c.description.toLowerCase().includes(term)
     )
   }
 
-  reply.view('courses/index', { courses: filteredCourses, term })
+  reply.view('courses/index', { courses: filtered, term })
 })
 
-// GET /courses/new — форма создания нового курса
+// GET /courses/new
 app.get('/courses/new', (req, reply) => {
-  reply.view('courses/new')
+  reply.view('courses/new', { title: '', description: '' })
 })
 
-// POST /courses — обработка формы добавления курса
-app.post('/courses', (req, reply) => {
+// POST /courses — yup валидация
+app.post('/courses', {
+  attachValidation: true,
+  schema: {
+    body: yup.object({
+      title: yup.string().min(2, 'Название должно быть не менее 2 символов').required('Название обязательно'),
+      description: yup.string().min(10, 'Описание должно быть не менее 10 символов').required('Описание обязательно'),
+    })
+  },
+  validatorCompiler: ({ schema }) => (data) => {
+    try {
+      const result = schema.validateSync(data)
+      return { value: result }
+    } catch (e) {
+      return { error: e }
+    }
+  }
+}, (req, reply) => {
   const { title, description } = req.body
 
-  if (!title || !description) {
-    reply.code(400).send('Название и описание обязательны')
-    return
+  if (req.validationError) {
+    return reply.view('courses/new', {
+      title,
+      description,
+      error: req.validationError,
+    })
   }
 
   const course = {
@@ -142,19 +158,15 @@ app.post('/courses', (req, reply) => {
   }
 
   state.courses.push(course)
-
   reply.redirect('/courses')
 })
 
-// GET /courses/:id — страница конкретного курса
+// GET /courses/:id — просмотр курса
 app.get('/courses/:id', (req, reply) => {
   const { id } = req.params
   const course = state.courses.find(c => c.id === parseInt(id, 10))
 
-  if (!course) {
-    reply.code(404).send({ message: 'Course not found' })
-    return
-  }
+  if (!course) return reply.code(404).send({ message: 'Course not found' })
 
   reply.view('courses/show', { course })
 })
@@ -163,13 +175,28 @@ app.get('/courses/:id', (req, reply) => {
    Прочие маршруты
 ==========================*/
 
-// GET /hello
+app.get('/safe-user', (req, reply) => {
+  const id = req.query.id || ''
+  const sanitized = sanitize(id)
+  reply.type('html').send(`<h1>${sanitized}</h1>`)
+})
+
+app.get('/unsafe-user', (req, reply) => {
+  const { id } = req.query
+  reply.view('unsafeUser', { id })
+})
+
+app.get('/users/:id/post/:postId', (req, reply) => {
+  const { id, postId } = req.params
+  reply.send(`User ID: ${id}; Post ID: ${postId}`)
+})
+
 app.get('/hello', (req, reply) => {
   const name = req.query.name || 'World'
   reply.send(`Hello, ${name}!\n`)
 })
 
-// ===== Запуск сервера =====
+// ===== Запуск =====
 app.listen({ port }, () => {
   console.log(`Server running at http://localhost:${port}`)
 })
