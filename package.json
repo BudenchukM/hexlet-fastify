@@ -9,7 +9,9 @@
   },
   "dependencies": {
     "@fastify/autoload": "^6.0.0",
+    "@fastify/cookie": "^11.0.2",
     "@fastify/formbody": "^8.0.2",
+    "@fastify/middie": "^9.0.3",
     "@fastify/sensible": "^6.0.0",
     "@fastify/view": "^11.1.1",
     "abstract-logging": "^2.0.1",
@@ -59,6 +61,7 @@
     "lodash": "^4.17.21",
     "makeerror": "^1.0.12",
     "minimist": "^1.2.8",
+    "morgan": "^1.10.1",
     "on-exit-leak-free": "^2.1.2",
     "once": "^1.4.0",
     "p-limit": "^2.3.0",
