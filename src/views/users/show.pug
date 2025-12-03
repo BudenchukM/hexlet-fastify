@@ -1,0 +1,11 @@
+extends ../layout
+
+block content
+  h1= user.name
+  p Email: #{user.email}
+  a(href=routes.editUser(user.id)) Редактировать
+  form(action=routes.user(user.id), method='POST', style='display:inline')
+    input(type='hidden', name='_method', value='DELETE')
+    button(type='submit') Удалить
+  br
+  a(href=routes.users()) ← Назад к списку пользователей

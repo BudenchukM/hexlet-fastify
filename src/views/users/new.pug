@@ -1,28 +1,17 @@
 extends ../layout
 
 block content
-  h1 Создать пользователя
-
-  if error
-    p(style="color:red")= error.message
+  h1 Создать нового пользователя
 
   form(action=routes.users(), method='POST')
     label Имя:
     input(type='text', name='name', value=name)
     br
-
     label Email:
     input(type='email', name='email', value=email)
     br
-
     label Пароль:
-    input(type='password', name='password', value=password)
+    input(type='password', name='password')
     br
-
-    label Подтверждение пароля:
-    input(type='password', name='passwordConfirmation', value=passwordConfirmation)
-    br
-
     input(type='submit', value='Создать')
-
 

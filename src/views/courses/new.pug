@@ -1,19 +1,14 @@
 extends ../layout
 
 block content
-  h1 Создать курс
-
-  if error
-    p(style="color:red")= error.message
+  h1 Создать новый курс
 
   form(action=routes.courses(), method='POST')
     label Название:
     input(type='text', name='title', value=title)
     br
-
     label Описание:
     textarea(name='description')= description
     br
-
     input(type='submit', value='Создать')
 

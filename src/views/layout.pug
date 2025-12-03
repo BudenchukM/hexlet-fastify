@@ -3,14 +3,19 @@ html(lang="ru")
   head
     meta(charset="UTF-8")
     title Мое приложение
+    style.
+      body { font-family: Arial; margin: 20px }
+      nav a { margin-right: 15px; text-decoration: none; color: #333 }
+      nav a:hover { text-decoration: underline }
   body
     header
       nav
-        a(href=routes.home()) Главная |
-        a(href=routes.users()) Пользователи |
+        a(href=routes.home()) Главная
+        a(href=routes.users()) Пользователи
         a(href=routes.courses()) Курсы
     main
       block content
     footer
       hr
       p &copy; 2025
+

@@ -1,20 +1,14 @@
 export const routes = {
-  // Главная
   home: () => '/',
+  
+  // Пользователи
+  users: () => '/users',
+  newUser: () => '/users/new',
+  user: id => `/users/${id}`,
+  editUser: id => `/users/${id}/edit`,
 
-  // Пользователи (новый путь)
-  users: () => '/u',
-  newUser: () => '/u/new',
-  user: id => `/u/${id}`,
-  userPost: (id, postId) => `/u/${id}/post/${postId}`,
-
-  // Курсы (новый путь)
-  courses: () => '/c',
-  newCourse: () => '/c/new',
-  course: id => `/c/${id}`,
-
-  // Прочие
-  safeUser: () => '/safe-user',
-  unsafeUser: () => '/unsafe-user',
-  hello: () => '/hello',
+  // Курсы
+  courses: () => '/courses',
+  newCourse: () => '/courses/new',
+  course: id => `/courses/${id}`,
 }

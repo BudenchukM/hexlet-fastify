@@ -1,0 +1,14 @@
+extends ../layout
+
+block content
+  h1 Редактировать пользователя
+
+  form(action=routes.user(user.id), method='POST')
+    input(type='hidden', name='_method', value='PATCH')
+    label Имя:
+    input(type='text', name='name', value=user.name)
+    br
+    label Email:
+    input(type='email', name='email', value=user.email)
+    br
+    input(type='submit', value='Сохранить')

@@ -37,7 +37,7 @@
     "fast-querystring": "^1.1.2",
     "fast-safe-stringify": "^2.1.1",
     "fast-uri": "^3.1.0",
-    "fastify": "^5.0.0",
+    "fastify": "^5.6.2",
     "fastify-cli": "^7.4.1",
     "fastify-plugin": "^5.0.0",
     "fastify-reverse-routes": "^3.0.0",
@@ -113,5 +113,13 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BudenchukM/hexlet-fastify.git"
+  },
+  "bugs": {
+    "url": "https://github.com/BudenchukM/hexlet-fastify/issues"
+  },
+  "homepage": "https://github.com/BudenchukM/hexlet-fastify#readme"
 }

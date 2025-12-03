@@ -2,15 +2,13 @@ extends ../layout
 
 block content
   h1 Курсы
-
   a(href=routes.newCourse()) Добавить курс
-
+  br
   if courses.length === 0
-    p Пока не добавлено ни одного курса
+    p Пока нет курсов
   else
-    each course in courses
-      div
-        h2
+    ul
+      each course in courses
+        li
           a(href=routes.course(course.id)) #{course.title}
-        p #{course.description}
 

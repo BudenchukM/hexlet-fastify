@@ -1,7 +1,11 @@
-//- src/views/index.pug
-extends layouts/page.pug
+extends layout
 
 block content
-  h1 Hello, World!
-  p Fastify + Pug работает!
+  h1 Добро пожаловать
+  p Это демонстрационное приложение с CRUD для пользователей и курсов.
+  ul
+    li
+      a(href=routes.users()) Перейти к пользователям
+    li
+      a(href=routes.courses()) Перейти к курсам
 
