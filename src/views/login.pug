@@ -1,0 +1,14 @@
+extends layout
+
+block content
+  h1 Вход
+  if error
+    p(style="color:red") #{error}
+  form(action='/login', method='POST')
+    label Email:
+    input(type='email', name='email')
+    br
+    label Пароль:
+    input(type='password', name='password')
+    br
+    input(type='submit', value='Войти')
