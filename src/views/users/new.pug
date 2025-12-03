@@ -1,25 +1,28 @@
-html
-  head
-    title Добавить пользователя
-  body
-    h1 Добавление нового пользователя
+extends ../layout
 
-    if error
-      p(style="color:red")= error.message
+block content
+  h1 Создать пользователя
 
-    form(action="/users" method="post")
-      div
-        label Имя:
-          input(type="text" name="name" value=name)
-      div
-        label Email:
-          input(type="email" name="email" value=email)
-      div
-        label Пароль:
-          input(type="password" name="password" value=password)
-      div
-        label Подтверждение пароля:
-          input(type="password" name="passwordConfirmation" value=passwordConfirmation)
-      div
-        input(type="submit" value="Зарегистрировать")
+  if error
+    p(style="color:red")= error.message
+
+  form(action=routes.users(), method='POST')
+    label Имя:
+    input(type='text', name='name', value=name)
+    br
+
+    label Email:
+    input(type='email', name='email', value=email)
+    br
+
+    label Пароль:
+    input(type='password', name='password', value=password)
+    br
+
+    label Подтверждение пароля:
+    input(type='password', name='passwordConfirmation', value=passwordConfirmation)
+    br
+
+    input(type='submit', value='Создать')
+
 

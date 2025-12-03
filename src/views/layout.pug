@@ -1,0 +1,16 @@
+doctype html
+html(lang="ru")
+  head
+    meta(charset="UTF-8")
+    title Мое приложение
+  body
+    header
+      nav
+        a(href=routes.home()) Главная |
+        a(href=routes.users()) Пользователи |
+        a(href=routes.courses()) Курсы
+    main
+      block content
+    footer
+      hr
+      p &copy; 2025

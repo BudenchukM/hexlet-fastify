@@ -1,9 +1,11 @@
-html
-  head
-    title Список пользователей
-  body
-    h1 Список пользователей
-    ul
-      each user in users
-        li #{user.name} — #{user.email}
-    a(href="/users/new") Добавить нового пользователя
+extends ../layout
+
+block content
+  h1 Пользователи
+
+  a(href=routes.newUser()) Добавить пользователя
+
+  ul
+    each user in users
+      li #{user.name} (#{user.email})
+

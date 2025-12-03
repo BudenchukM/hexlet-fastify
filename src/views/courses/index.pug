@@ -1,18 +1,16 @@
-extends ../layouts/page.pug
+extends ../layout
 
 block content
-  h1 Курсы по программированию
+  h1 Курсы
 
-  form(role='form', method='GET', action='/courses')
-    input(type='search', name='term', value=term placeholder='Введите название или описание' required)
-    input(type='submit', value='Искать')
+  a(href=routes.newCourse()) Добавить курс
 
   if courses.length === 0
-    p Пока не найдено ни одного курса
+    p Пока не добавлено ни одного курса
   else
     each course in courses
-      div.course
+      div
         h2
-          a(href=`/courses/${course.id}`)= course.title
-        p= course.description
+          a(href=routes.course(course.id)) #{course.title}
+        p #{course.description}
 

@@ -7,6 +7,7 @@ import _ from 'lodash'
 import * as yup from 'yup'
 
 import getUsers from './utils.js'
+import { routes } from './routes.js'
 
 const app = fastify()
 const port = 3000
@@ -29,8 +30,8 @@ const state = {
 }
 
 // ===== Главная =====
-app.get('/', (req, reply) => {
-  reply.view('index')
+app.get(routes.home(), (req, reply) => {
+  reply.view('index', { routes })
 })
 
 /* =======================
@@ -38,23 +39,23 @@ app.get('/', (req, reply) => {
 ==========================*/
 
 // GET /users — список
-app.get('/users', (req, reply) => {
+app.get(routes.users(), (req, reply) => {
   const page = parseInt(req.query.page, 10) || 1
   const per = parseInt(req.query.per, 10) || 5
   const start = (page - 1) * per
   const end = start + per
 
   const pageUsers = state.users.slice(start, end)
-  reply.view('users/index', { users: pageUsers, page, per })
+  reply.view('users/index', { users: pageUsers, page, per, routes })
 })
 
 // GET /users/new — форма
-app.get('/users/new', (req, reply) => {
-  reply.view('users/new', { name: '', email: '', password: '', passwordConfirmation: '' })
+app.get(routes.newUser(), (req, reply) => {
+  reply.view('users/new', { name: '', email: '', password: '', passwordConfirmation: '', routes })
 })
 
 // POST /users — yup валидация
-app.post('/users', {
+app.post(routes.users(), {
   attachValidation: true,
   schema: {
     body: yup.object({
@@ -68,7 +69,6 @@ app.post('/users', {
     if (data.password !== data.passwordConfirmation) {
       return { error: new Error('Пароли не совпадают') }
     }
-
     try {
       const result = schema.validateSync(data)
       return { value: result }
@@ -86,6 +86,7 @@ app.post('/users', {
       password,
       passwordConfirmation,
       error: req.validationError,
+      routes
     })
   }
 
@@ -97,7 +98,7 @@ app.post('/users', {
   }
 
   state.users.push(user)
-  reply.redirect('/users')
+  reply.redirect(routes.users())
 })
 
 /* =======================
@@ -105,7 +106,7 @@ app.post('/users', {
 ==========================*/
 
 // GET /courses — список + поиск
-app.get('/courses', (req, reply) => {
+app.get(routes.courses(), (req, reply) => {
   const term = (req.query.term || '').toLowerCase()
   let filtered = state.courses
 
@@ -115,16 +116,16 @@ app.get('/courses', (req, reply) => {
     )
   }
 
-  reply.view('courses/index', { courses: filtered, term })
+  reply.view('courses/index', { courses: filtered, term, routes })
 })
 
 // GET /courses/new
-app.get('/courses/new', (req, reply) => {
-  reply.view('courses/new', { title: '', description: '' })
+app.get(routes.newCourse(), (req, reply) => {
+  reply.view('courses/new', { title: '', description: '', routes })
 })
 
 // POST /courses — yup валидация
-app.post('/courses', {
+app.post(routes.courses(), {
   attachValidation: true,
   schema: {
     body: yup.object({
@@ -148,6 +149,7 @@ app.post('/courses', {
       title,
       description,
       error: req.validationError,
+      routes
     })
   }
 
@@ -158,40 +160,40 @@ app.post('/courses', {
   }
 
   state.courses.push(course)
-  reply.redirect('/courses')
+  reply.redirect(routes.courses())
 })
 
 // GET /courses/:id — просмотр курса
-app.get('/courses/:id', (req, reply) => {
+app.get(routes.course(':id'), (req, reply) => {
   const { id } = req.params
   const course = state.courses.find(c => c.id === parseInt(id, 10))
 
   if (!course) return reply.code(404).send({ message: 'Course not found' })
 
-  reply.view('courses/show', { course })
+  reply.view('courses/show', { course, routes })
 })
 
 /* =======================
    Прочие маршруты
 ==========================*/
 
-app.get('/safe-user', (req, reply) => {
+app.get(routes.safeUser(), (req, reply) => {
   const id = req.query.id || ''
   const sanitized = sanitize(id)
   reply.type('html').send(`<h1>${sanitized}</h1>`)
 })
 
-app.get('/unsafe-user', (req, reply) => {
+app.get(routes.unsafeUser(), (req, reply) => {
   const { id } = req.query
-  reply.view('unsafeUser', { id })
+  reply.view('unsafeUser', { id, routes })
 })
 
-app.get('/users/:id/post/:postId', (req, reply) => {
+app.get(routes.userPost(':id', ':postId'), (req, reply) => {
   const { id, postId } = req.params
   reply.send(`User ID: ${id}; Post ID: ${postId}`)
 })
 
-app.get('/hello', (req, reply) => {
+app.get(routes.hello(), (req, reply) => {
   const name = req.query.name || 'World'
   reply.send(`Hello, ${name}!\n`)
 })

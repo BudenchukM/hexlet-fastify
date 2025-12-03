@@ -1,19 +1,19 @@
-html
-  head
-    title Добавить курс
-  body
-    h1 Добавить новый курс
+extends ../layout
 
-    if error
-      p(style="color:red")= error.message
+block content
+  h1 Создать курс
 
-    form(action='/courses' method='post')
-      div
-        label Название:
-          input(type='text' name='title' value=title)
-      div
-        label Описание:
-          textarea(name='description')= description
-      div
-        input(type='submit' value='Создать курс')
+  if error
+    p(style="color:red")= error.message
+
+  form(action=routes.courses(), method='POST')
+    label Название:
+    input(type='text', name='title', value=title)
+    br
+
+    label Описание:
+    textarea(name='description')= description
+    br
+
+    input(type='submit', value='Создать')
 
